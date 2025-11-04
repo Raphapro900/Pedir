@@ -12,16 +12,48 @@
 
     body {
       margin: 0;
-      padding: 1em;
+      padding: 0;
       background-color: #121212;
       color: white;
       font-family: 'riffc', sans-serif;
+      overflow: hidden;
+    }
+
+    #introScreen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 1s ease-out;
+    }
+
+    #introText {
+      font-size: 2em;
+      color: white;
+      opacity: 0;
+      animation: fadeInOut 5s ease-in-out forwards;
+      font-family: 'riffc';
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
     }
 
     .container {
       max-width: 400px;
       margin: auto;
       text-align: center;
+      padding: 1em;
+      display: none;
     }
 
     #logo {
@@ -100,7 +132,11 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="introScreen">
+    <div id="introText">Raphapro900 Studios</div>
+  </div>
+
+  <div class="container" id="mainContent">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
@@ -110,6 +146,16 @@
 
   <script>
     let pedidosData = [];
+
+    // Intro timing
+    setTimeout(() => {
+      document.getElementById('introScreen').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('introScreen').remove();
+        document.getElementById('mainContent').style.display = 'block';
+        document.body.style.overflow = 'auto';
+      }, 1000);
+    }, 6000); // 5s for text + 1s delay
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -224,31 +270,3 @@
         pedidoDiv.remove();
         pedidosData.splice(num - 1, 1);
         updatePedidoNumbers();
-      };
-
-      pedidoDiv.appendChild(label);
-      pedidoDiv.appendChild(pedidoBtn);
-      pedidoDiv.appendChild(editBtn);
-      pedidoDiv.appendChild(deleteBtn);
-
-      if (!container) document.getElementById('pedidos').appendChild(pedidoDiv);
-    }
-
-    function showOverlay(titulo, descripcion) {
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      overlay.onclick = () => overlay.remove();
-
-      const content = document.createElement('div');
-      content.className = 'overlay-content';
-      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
-
-      overlay.appendChild(content);
-      document.body.appendChild(overlay);
-    }
-
-    document.getElementById('addBtn').addEventListener('click', createPedido);
-    loadPedidos();
-  </script>
-</body>
-</html>
