@@ -41,6 +41,14 @@
       font-family: 'riffc';
     }
 
+    #playerName {
+      margin-bottom: 1em;
+      padding: 0.5em;
+      font-size: 1em;
+      font-family: 'riffc';
+      width: 100%;
+    }
+
     #addBtn {
       font-size: 1.5em;
       padding: 0.5em;
@@ -114,6 +122,7 @@
   <div class="container">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="langBtn">Cambiar a Inglés</button>
+    <input type="text" id="playerName" placeholder="Tu nombre" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
   </div>
@@ -131,6 +140,7 @@
         delete: '🗑',
         done: '✔',
         placeholder: 'Descripción...',
+        namePlaceholder: 'Tu nombre',
         langToggle: 'Cambiar a Inglés',
         pedido: 'Pedido'
       },
@@ -140,6 +150,7 @@
         delete: '🗑',
         done: '✔',
         placeholder: 'Description...',
+        namePlaceholder: 'Your name',
         langToggle: 'Switch to Spanish',
         pedido: 'Order'
       }
@@ -149,6 +160,7 @@
       currentLang = currentLang === 'es' ? 'en' : 'es';
       document.getElementById('langBtn').textContent = translations[currentLang].langToggle;
       document.getElementById('addBtn').textContent = translations[currentLang].add;
+      document.getElementById('playerName').placeholder = translations[currentLang].namePlaceholder;
       document.querySelectorAll('.pedido input').forEach(input => {
         input.placeholder = translations[currentLang].placeholder;
       });
@@ -162,7 +174,7 @@
       const stored = localStorage.getItem('pedidos');
       if (stored) {
         pedidosData = JSON.parse(stored);
-        pedidosData.forEach((desc, i) => renderPedido(i + 1, desc));
+        pedidosData.forEach((p, i) => renderPedido(i + 1, p.desc, p.player));
       }
     }
 
@@ -178,20 +190,23 @@
         const btn = pedido.querySelector('button');
         if (label && btn && !btn.textContent.includes(translations[currentLang].edit)) {
           const desc = btn.textContent.split(': ')[1];
-          label.textContent = `${translations[currentLang].pedido} ${index + 1}:`;
+          const player = label.getAttribute('data-player');
+          label.textContent = `${translations[currentLang].pedido} ${index + 1} (${player}):`;
           btn.textContent = `${label.textContent} ${desc}`;
-          pedidosData.push(desc);
+          pedidosData.push({ desc, player });
         }
       });
       savePedidos();
     }
 
     function createPedido() {
+      const player = document.getElementById('playerName').value.trim() || 'Anon';
       const pedidoDiv = document.createElement('div');
       pedidoDiv.className = 'pedido';
 
       const label = document.createElement('span');
-      label.textContent = `${translations[currentLang].pedido} ${getNextPedidoNumber()}:`;
+      label.textContent = `${translations[currentLang].pedido} ${getNextPedidoNumber()} (${player}):`;
+      label.setAttribute('data-player', player);
 
       const input = document.createElement('input');
       input.type = 'text';
@@ -203,13 +218,13 @@
         const desc = input.value.trim();
         if (!desc) return;
 
-        pedidosData.push(desc);
+        pedidosData.push({ desc, player });
         savePedidos();
 
         input.remove();
         doneBtn.remove();
 
-        renderPedido(pedidosData.length, desc, pedidoDiv);
+        renderPedido(pedidosData.length, desc, player, pedidoDiv);
       };
 
       pedidoDiv.appendChild(label);
@@ -219,13 +234,14 @@
       document.getElementById('pedidos').appendChild(pedidoDiv);
     }
 
-    function renderPedido(num, desc, container = null) {
+    function renderPedido(num, desc, player, container = null) {
       const pedidoDiv = container || document.createElement('div');
       pedidoDiv.className = 'pedido';
       pedidoDiv.innerHTML = '';
 
       const label = document.createElement('span');
-      label.textContent = `${translations[currentLang].pedido} ${num}:`;
+      label.textContent = `${translations[currentLang].pedido} ${num} (${player}):`;
+      label.setAttribute('data-player', player);
 
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
@@ -248,18 +264,3 @@
 
         const doneBtn = document.createElement('button');
         doneBtn.textContent = translations[currentLang].done;
-        doneBtn.onclick = () => {
-          const newDesc = input.value.trim();
-          if (!newDesc) return;
-          pedidosData[num - 1] = newDesc;
-          savePedidos();
-          input.remove();
-          doneBtn.remove();
-          renderPedido(num, newDesc, pedidoDiv);
-        };
-
-        pedidoDiv.appendChild(input);
-        pedidoDiv.appendChild(doneBtn);
-      };
-
-      const deleteBtn = document.createElement('button
