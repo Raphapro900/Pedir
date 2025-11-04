@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pedidos Remixables</title>
+  <title>Pedidos Multijugador</title>
   <style>
     @font-face {
       font-family: 'riffc';
@@ -12,45 +12,33 @@
 
     body {
       margin: 0;
-      padding: 0;
+      padding: 1em;
       background-color: #121212;
       color: white;
       font-family: 'riffc', sans-serif;
-      overflow: hidden;
-    }
-
-    #introVideo {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 1000;
-    }
-
-    #introOverlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: black;
-      z-index: 999;
-      opacity: 1;
-      transition: opacity 2s ease-out;
     }
 
     .container {
       max-width: 400px;
       margin: auto;
       text-align: center;
-      padding: 1em;
-      display: none;
     }
 
     #logo {
       width: 150px;
       margin-bottom: 1em;
       border-radius: 10px;
+    }
+
+    #langBtn {
+      margin-bottom: 1em;
+      background-color: #ffab00;
+      color: black;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'riffc';
     }
 
     #addBtn {
@@ -123,11 +111,9 @@
   </style>
 </head>
 <body>
-  <video id="introVideo" src="intro.mp4" autoplay muted playsinline></video>
-  <div id="introOverlay"></div>
-
-  <div class="container" id="mainContent">
+  <div class="container">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
+    <button id="langBtn">Cambiar a Inglés</button>
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
   </div>
@@ -136,20 +122,37 @@
 
   <script>
     let pedidosData = [];
+    let currentLang = 'es';
 
-    const introVideo = document.getElementById('introVideo');
-    const introOverlay = document.getElementById('introOverlay');
-    const mainContent = document.getElementById('mainContent');
+    const translations = {
+      es: {
+        add: '+',
+        edit: '✎',
+        delete: '🗑',
+        done: '✔',
+        placeholder: 'Descripción...',
+        langToggle: 'Cambiar a Inglés',
+        pedido: 'Pedido'
+      },
+      en: {
+        add: '+',
+        edit: '✎',
+        delete: '🗑',
+        done: '✔',
+        placeholder: 'Description...',
+        langToggle: 'Switch to Spanish',
+        pedido: 'Order'
+      }
+    };
 
-    introVideo.addEventListener('ended', () => {
-      introOverlay.style.opacity = '0';
-      setTimeout(() => {
-        introVideo.remove();
-        introOverlay.remove();
-        mainContent.style.display = 'block';
-        document.body.style.overflow = 'auto';
-      }, 2000);
-    });
+    function updateLang() {
+      currentLang = currentLang === 'es' ? 'en' : 'es';
+      document.getElementById('langBtn').textContent = translations[currentLang].langToggle;
+      document.getElementById('addBtn').textContent = translations[currentLang].add;
+      document.querySelectorAll('.pedido input').forEach(input => {
+        input.placeholder = translations[currentLang].placeholder;
+      });
+    }
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -173,10 +176,10 @@
       allPedidos.forEach((pedido, index) => {
         const label = pedido.querySelector('span');
         const btn = pedido.querySelector('button');
-        if (label && btn && !btn.textContent.includes('✎')) {
-          label.textContent = `Pedido ${index + 1}:`;
+        if (label && btn && !btn.textContent.includes(translations[currentLang].edit)) {
           const desc = btn.textContent.split(': ')[1];
-          btn.textContent = `Pedido ${index + 1}: ${desc}`;
+          label.textContent = `${translations[currentLang].pedido} ${index + 1}:`;
+          btn.textContent = `${label.textContent} ${desc}`;
           pedidosData.push(desc);
         }
       });
@@ -188,14 +191,14 @@
       pedidoDiv.className = 'pedido';
 
       const label = document.createElement('span');
-      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
+      label.textContent = `${translations[currentLang].pedido} ${getNextPedidoNumber()}:`;
 
       const input = document.createElement('input');
       input.type = 'text';
-      input.placeholder = 'Descripción...';
+      input.placeholder = translations[currentLang].placeholder;
 
       const doneBtn = document.createElement('button');
-      doneBtn.textContent = '✔';
+      doneBtn.textContent = translations[currentLang].done;
       doneBtn.onclick = () => {
         const desc = input.value.trim();
         if (!desc) return;
@@ -222,7 +225,7 @@
       pedidoDiv.innerHTML = '';
 
       const label = document.createElement('span');
-      label.textContent = `Pedido ${num}:`;
+      label.textContent = `${translations[currentLang].pedido} ${num}:`;
 
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
@@ -232,7 +235,7 @@
       };
 
       const editBtn = document.createElement('button');
-      editBtn.textContent = '✎';
+      editBtn.textContent = translations[currentLang].edit;
       editBtn.onclick = () => {
         pedidoBtn.remove();
         editBtn.remove();
@@ -241,9 +244,10 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.value = desc;
+        input.placeholder = translations[currentLang].placeholder;
 
         const doneBtn = document.createElement('button');
-        doneBtn.textContent = '✔';
+        doneBtn.textContent = translations[currentLang].done;
         doneBtn.onclick = () => {
           const newDesc = input.value.trim();
           if (!newDesc) return;
@@ -258,21 +262,4 @@
         pedidoDiv.appendChild(doneBtn);
       };
 
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = '🗑';
-      deleteBtn.onclick = () => {
-        pedidoDiv.remove();
-        pedidosData.splice(num - 1, 1);
-        updatePedidoNumbers();
-      };
-
-      pedidoDiv.appendChild(label);
-      pedidoDiv.appendChild(pedidoBtn);
-      pedidoDiv.appendChild(editBtn);
-      pedidoDiv.appendChild(deleteBtn);
-
-      if (!container) document.getElementById('pedidos').appendChild(pedidoDiv);
-    }
-
-    function showOverlay(titulo, descripcion) {
-      const overlay = document.createElement
+      const deleteBtn = document.createElement('button
