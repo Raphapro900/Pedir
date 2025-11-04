@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pedidos Remixables</title>
+  <style>
+    @font-face {
+      font-family: 'RifficFreeBold';
+      src: url('RifficFree-Bold.ttf') format('truetype');
+    }
+
+    body {
+      margin: 0;
+      padding: 1em;
+      background-color: #121212;
+      color: white;
+      font-family: 'RifficFreeBold', sans-serif;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      text-align: center;
+    }
+
+    #logo {
+      width: 150px;
+      margin-bottom: 1em;
+      border-radius: 10px;
+    }
+
+    #addBtn {
+      font-size: 1.5em;
+      padding: 0.5em;
+      width: 100%;
+      background-color: #00c853;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .pedido {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .pedido span {
+      margin-right: 5px;
+    }
+
+    .pedido input[type="text"] {
+      flex: 1;
+      padding: 5px;
+      font-size: 1em;
+    }
+
+    .pedido button {
+      margin-left: 5px;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .overlay-content {
+      color: white;
+      text-align: center;
+      font-size: 2em;
+      font-family: 'RifficFreeBold';
+      animation: zoomIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards, shake 1s infinite;
+      transform: scale(0);
+    }
+
+    @keyframes zoomIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="logo.png" id="logo" alt="Logo" />
+    <button id="addBtn">+</button>
+    <div id="pedidos"></div>
+  </div>
+
+  <script>
+    let pedidosData = [];
+
+    function savePedidos() {
+      localStorage.setItem('pedidos', JSON.stringify(pedidosData));
+    }
+
+    function loadPedidos() {
+      const stored = localStorage.getItem('pedidos');
+      if (stored) {
+        pedidosData = JSON.parse(stored);
+        pedidosData.forEach((desc, i) => renderPedido(i + 1, desc));
+      }
+    }
+
+    function getNextPedidoNumber() {
+      return pedidosData.length + 1;
+    }
+
+    function updatePedidoNumbers() {
+      const allPedidos = document.querySelectorAll('.pedido');
+      pedidosData = [];
+      allPedidos.forEach((pedido, index) => {
+        const label = pedido.querySelector('span');
+        const btn = pedido.querySelector('button');
+        if (label && btn && !btn.textContent.includes('✎')) {
+          label.textContent = `Pedido ${index + 1}:`;
+          const desc = btn.textContent.split(': ')[1];
+          btn.textContent = `Pedido ${index + 1}: ${desc}`;
+          pedidosData.push(desc);
+        }
+      });
+      savePedidos();
+    }
+
+    function createPedido() {
+      const pedidoDiv = document.createElement('div');
+      pedidoDiv.className = 'pedido';
+
+      const label = document.createElement('span');
+      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Descripción...';
+
+      const doneBtn = document.createElement('button');
+      doneBtn.textContent = '✔';
+      doneBtn.onclick = () => {
+        const desc = input.value.trim();
+        if (!desc) return;
+
+        pedidosData.push(desc);
+        savePedidos();
+
+        input.remove();
+        doneBtn.remove();
+
+        renderPedido(pedidosData.length, desc, pedidoDiv);
+      };
+
+      pedidoDiv.appendChild(label);
+      pedidoDiv.appendChild(input);
+      pedidoDiv.appendChild(doneBtn);
+
+      document.getElementById('pedidos').appendChild(pedidoDiv);
+    }
+
+    function renderPedido(num, desc, container = null) {
+      const pedidoDiv = container || document.createElement('div');
+      pedidoDiv.className = 'pedido';
+      pedidoDiv.innerHTML = '';
+
+      const label = document.createElement('span');
+      label.textContent = `Pedido ${num}:`;
+
+      const pedidoBtn = document.createElement('button');
+      pedidoBtn.textContent = `${label.textContent} ${desc}`;
+      pedidoBtn.onclick = () => showOverlay(label.textContent, desc);
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✎';
+      editBtn.onclick = () => {
+        pedidoBtn.remove();
+        editBtn.remove();
+        deleteBtn.remove();
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = desc;
+
+        const doneBtn = document.createElement('button');
+        doneBtn.textContent = '✔';
+        doneBtn.onclick = () => {
+          const newDesc = input.value.trim();
+          if (!newDesc) return;
+          pedidosData[num - 1] = newDesc;
+          savePedidos();
+          input.remove();
+          doneBtn.remove();
+          renderPedido(num, newDesc, pedidoDiv);
+        };
+
+        pedidoDiv.appendChild(input);
+        pedidoDiv.appendChild(doneBtn);
+      };
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑';
+      deleteBtn.onclick = () => {
+        pedidoDiv.remove();
+        pedidosData.splice(num - 1, 1);
+        updatePedidoNumbers();
+      };
+
+      pedidoDiv.appendChild(label);
+      pedidoDiv.appendChild(pedidoBtn);
+      pedidoDiv.appendChild(editBtn);
+      pedidoDiv.appendChild(deleteBtn);
+
+      if (!container) document.getElementById('pedidos').appendChild(pedidoDiv);
+    }
+
+    function showOverlay(titulo, descripcion) {
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.onclick = () => overlay.remove();
+
+      const content = document.createElement('div');
+      content.className = 'overlay-content';
+      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
+
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
+    }
+
+    document.getElementById('addBtn').addEventListener('click', createPedido);
+    loadPedidos();
+  </script>
+</body>
+</html>
