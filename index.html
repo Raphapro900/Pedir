@@ -6,7 +6,7 @@
   <title>Pedidos Remixables</title>
   <style>
     @font-face {
-      font-family: 'RifficFreeBold';
+      font-family: 'riffc';
       src: url('RifficFree-Bold.ttf') format('truetype');
     }
 
@@ -15,7 +15,7 @@
       padding: 1em;
       background-color: #121212;
       color: white;
-      font-family: 'RifficFreeBold', sans-serif;
+      font-family: 'riffc', sans-serif;
     }
 
     .container {
@@ -39,6 +39,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      font-family: 'riffc';
     }
 
     .pedido {
@@ -55,10 +56,12 @@
       flex: 1;
       padding: 5px;
       font-size: 1em;
+      font-family: 'riffc';
     }
 
     .pedido button {
       margin-left: 5px;
+      font-family: 'riffc';
     }
 
     .overlay {
@@ -76,8 +79,8 @@
       color: white;
       text-align: center;
       font-size: 2em;
-      font-family: 'RifficFreeBold';
-      animation: zoomIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards, shake 1s infinite;
+      font-family: 'riffc';
+      animation: zoomIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards, shakeLoop 2s infinite;
       transform: scale(0);
     }
 
@@ -86,20 +89,24 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
+    @keyframes shakeLoop {
+      0%   { transform: translate(-5px, -5px); }
+      20%  { transform: translate(5px, 5px); }
+      40%  { transform: translate(-5px, 0); }
+      60%  { transform: translate(5px, -5px); }
+      80%  { transform: translate(0px, 5px); }
+      100% { transform: translate(5px, 5px); }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="logo.png" id="logo" alt="Logo" />
+    <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
   </div>
+
+  <audio id="pedidoSound" src="pedido.mp3"></audio>
 
   <script>
     let pedidosData = [];
@@ -179,7 +186,11 @@
 
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
-      pedidoBtn.onclick = () => showOverlay(label.textContent, desc);
+      pedidoBtn.onclick = () => {
+        document.getElementById('pedidoSound').play();
+        setTimeout(() => speak(`${label.textContent} ${desc}`), 1000);
+        showOverlay(label.textContent, desc);
+      };
 
       const editBtn = document.createElement('button');
       editBtn.textContent = '✎';
@@ -235,6 +246,12 @@
 
       overlay.appendChild(content);
       document.body.appendChild(overlay);
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'es-ES';
+      speechSynthesis.speak(utterance);
     }
 
     document.getElementById('addBtn').addEventListener('click', createPedido);
