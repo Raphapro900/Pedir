@@ -188,7 +188,6 @@
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
       pedidoBtn.onclick = () => {
         document.getElementById('pedidoSound').play();
-        setTimeout(() => speak(`${label.textContent} ${desc}`), 1000);
         showOverlay(label.textContent, desc);
       };
 
@@ -246,12 +245,6 @@
 
       overlay.appendChild(content);
       document.body.appendChild(overlay);
-    }
-
-    function speak(text) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'es-ES';
-      speechSynthesis.speak(utterance);
     }
 
     document.getElementById('addBtn').addEventListener('click', createPedido);
