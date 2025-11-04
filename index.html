@@ -19,23 +19,24 @@
       overflow: hidden;
     }
 
-    #introScreen {
+    #introVideo {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1000;
+    }
+
+    #introOverlay {
       position: fixed;
       top: 0; left: 0;
       width: 100vw;
       height: 100vh;
       background-color: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+      z-index: 999;
       opacity: 1;
-      transition: opacity 1s ease-out;
-    }
-
-    #introImage {
-      max-width: 80%;
-      max-height: 80%;
+      transition: opacity 2s ease-out;
     }
 
     .container {
@@ -122,9 +123,8 @@
   </style>
 </head>
 <body>
-  <div id="introScreen">
-    <img src="Intro.png" id="introImage" alt="Intro" />
-  </div>
+  <video id="introVideo" src="intro.mp4" autoplay muted playsinline></video>
+  <div id="introOverlay"></div>
 
   <div class="container" id="mainContent">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
@@ -137,15 +137,19 @@
   <script>
     let pedidosData = [];
 
-    // Intro timing
-    setTimeout(() => {
-      document.getElementById('introScreen').style.opacity = '0';
+    const introVideo = document.getElementById('introVideo');
+    const introOverlay = document.getElementById('introOverlay');
+    const mainContent = document.getElementById('mainContent');
+
+    introVideo.addEventListener('ended', () => {
+      introOverlay.style.opacity = '0';
       setTimeout(() => {
-        document.getElementById('introScreen').remove();
-        document.getElementById('mainContent').style.display = 'block';
+        introVideo.remove();
+        introOverlay.remove();
+        mainContent.style.display = 'block';
         document.body.style.overflow = 'auto';
-      }, 1000);
-    }, 5000); // 5s display + 1s fade
+      }, 2000);
+    });
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -267,4 +271,8 @@
       pedidoDiv.appendChild(editBtn);
       pedidoDiv.appendChild(deleteBtn);
 
-      if (!container) document.getElementById('pedidos').append
+      if (!container) document.getElementById('pedidos').appendChild(pedidoDiv);
+    }
+
+    function showOverlay(titulo, descripcion) {
+      const overlay = document.createElement
