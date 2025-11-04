@@ -262,4 +262,40 @@
         pedidoDiv.appendChild(doneBtn);
       };
 
-      const deleteBtn = document.createElement('button
+      const deleteBtn = document.createElement('button      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = translations[currentLang].delete;
+      deleteBtn.onclick = () => {
+        pedidoDiv.remove();
+        pedidosData.splice(num - 1, 1);
+        updatePedidoNumbers();
+      };
+
+      pedidoDiv.appendChild(label);
+      pedidoDiv.appendChild(pedidoBtn);
+      pedidoDiv.appendChild(editBtn);
+      pedidoDiv.appendChild(deleteBtn);
+
+      if (!container) {
+        document.getElementById('pedidos').appendChild(pedidoDiv);
+      }
+    }
+
+    function showOverlay(titulo, descripcion) {
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.onclick = () => overlay.remove();
+
+      const content = document.createElement('div');
+      content.className = 'overlay-content';
+      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
+
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
+    }
+
+    document.getElementById('langBtn').addEventListener('click', updateLang);
+    document.getElementById('addBtn').addEventListener('click', createPedido);
+    loadPedidos();
+  </script>
+</body>
+</html>
