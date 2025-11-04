@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Pedidos Multijugador</title>
+  <title>Pedidos Remixables</title>
   <style>
     @font-face {
       font-family: 'riffc';
@@ -28,17 +28,6 @@
       width: 150px;
       margin-bottom: 1em;
       border-radius: 10px;
-    }
-
-    #langBtn {
-      margin-bottom: 1em;
-      background-color: #ffab00;
-      color: black;
-      border: none;
-      padding: 0.5em 1em;
-      border-radius: 5px;
-      cursor: pointer;
-      font-family: 'riffc';
     }
 
     #addBtn {
@@ -113,7 +102,6 @@
 <body>
   <div class="container">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
-    <button id="langBtn">Cambiar a Inglés</button>
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
   </div>
@@ -122,37 +110,6 @@
 
   <script>
     let pedidosData = [];
-    let currentLang = 'es';
-
-    const translations = {
-      es: {
-        add: '+',
-        edit: '✎',
-        delete: '🗑',
-        done: '✔',
-        placeholder: 'Descripción...',
-        langToggle: 'Cambiar a Inglés',
-        pedido: 'Pedido'
-      },
-      en: {
-        add: '+',
-        edit: '✎',
-        delete: '🗑',
-        done: '✔',
-        placeholder: 'Description...',
-        langToggle: 'Switch to Spanish',
-        pedido: 'Order'
-      }
-    };
-
-    function updateLang() {
-      currentLang = currentLang === 'es' ? 'en' : 'es';
-      document.getElementById('langBtn').textContent = translations[currentLang].langToggle;
-      document.getElementById('addBtn').textContent = translations[currentLang].add;
-      document.querySelectorAll('.pedido input').forEach(input => {
-        input.placeholder = translations[currentLang].placeholder;
-      });
-    }
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -176,10 +133,10 @@
       allPedidos.forEach((pedido, index) => {
         const label = pedido.querySelector('span');
         const btn = pedido.querySelector('button');
-        if (label && btn && !btn.textContent.includes(translations[currentLang].edit)) {
+        if (label && btn && !btn.textContent.includes('✎')) {
+          label.textContent = `Pedido ${index + 1}:`;
           const desc = btn.textContent.split(': ')[1];
-          label.textContent = `${translations[currentLang].pedido} ${index + 1}:`;
-          btn.textContent = `${label.textContent} ${desc}`;
+          btn.textContent = `Pedido ${index + 1}: ${desc}`;
           pedidosData.push(desc);
         }
       });
@@ -191,31 +148,27 @@
       pedidoDiv.className = 'pedido';
 
       const label = document.createElement('span');
-      label.textContent = `${translations[currentLang].pedido} ${getNextPedidoNumber()}:`;
+      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
 
       const input = document.createElement('input');
       input.type = 'text';
-      input.placeholder = translations[currentLang].placeholder;
+      input.placeholder = 'Descripción...';
 
       const doneBtn = document.createElement('button');
-      doneBtn.textContent = translations[currentLang].done;
+      doneBtn.textContent = '✔';
       doneBtn.onclick = () => {
         const desc = input.value.trim();
         if (!desc) return;
-
         pedidosData.push(desc);
         savePedidos();
-
         input.remove();
         doneBtn.remove();
-
         renderPedido(pedidosData.length, desc, pedidoDiv);
       };
 
       pedidoDiv.appendChild(label);
       pedidoDiv.appendChild(input);
       pedidoDiv.appendChild(doneBtn);
-
       document.getElementById('pedidos').appendChild(pedidoDiv);
     }
 
@@ -225,7 +178,7 @@
       pedidoDiv.innerHTML = '';
 
       const label = document.createElement('span');
-      label.textContent = `${translations[currentLang].pedido} ${num}:`;
+      label.textContent = `Pedido ${num}:`;
 
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
@@ -235,7 +188,7 @@
       };
 
       const editBtn = document.createElement('button');
-      editBtn.textContent = translations[currentLang].edit;
+      editBtn.textContent = '✎';
       editBtn.onclick = () => {
         pedidoBtn.remove();
         editBtn.remove();
@@ -244,10 +197,9 @@
         const input = document.createElement('input');
         input.type = 'text';
         input.value = desc;
-        input.placeholder = translations[currentLang].placeholder;
 
         const doneBtn = document.createElement('button');
-        doneBtn.textContent = translations[currentLang].done;
+        doneBtn.textContent = '✔';
         doneBtn.onclick = () => {
           const newDesc = input.value.trim();
           if (!newDesc) return;
@@ -262,8 +214,8 @@
         pedidoDiv.appendChild(doneBtn);
       };
 
-      const deleteBtn = document.createElement('button      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = translations[currentLang].delete;
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑';
       deleteBtn.onclick = () => {
         pedidoDiv.remove();
         pedidosData.splice(num - 1, 1);
@@ -293,7 +245,6 @@
       document.body.appendChild(overlay);
     }
 
-    document.getElementById('langBtn').addEventListener('click', updateLang);
     document.getElementById('addBtn').addEventListener('click', createPedido);
     loadPedidos();
   </script>
