@@ -121,6 +121,7 @@
 
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
+  <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
 
   <script>
     let pedidosData = [];
@@ -266,10 +267,12 @@
     document.getElementById('addBtn').addEventListener('click', createPedido);
 
     document.getElementById('logo').addEventListener('click', () => {
-      document.getElementById('logoSound').play();
       logoClicks++;
       if (logoClicks >= 5) {
         document.getElementById('logo').classList.add('rainbow');
+        document.getElementById('rainbowSound').play();
+      } else {
+        document.getElementById('logoSound').play();
       }
     });
 
