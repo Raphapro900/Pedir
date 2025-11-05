@@ -29,6 +29,18 @@
       margin-bottom: 1em;
       border-radius: 10px;
       cursor: pointer;
+      transition: all 0.5s ease;
+    }
+
+    #logo.rainbow {
+      animation: rainbowPulse 2s infinite;
+      filter: hue-rotate(360deg) saturate(2);
+    }
+
+    @keyframes rainbowPulse {
+      0%   { filter: hue-rotate(0deg); }
+      50%  { filter: hue-rotate(180deg); }
+      100% { filter: hue-rotate(360deg); }
     }
 
     #addBtn {
@@ -112,6 +124,7 @@
 
   <script>
     let pedidosData = [];
+    let logoClicks = 0;
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -185,7 +198,11 @@
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
       pedidoBtn.onclick = () => {
-        document.getElementById('pedidoSound').play();
+        const triggerWords = ['tututututu', "McDonald's", 'McDonalds'];
+        const normalized = desc.toLowerCase();
+        const match = triggerWords.some(word => normalized.includes(word.toLowerCase()));
+        const sound = match ? 'logoSound' : 'pedidoSound';
+        document.getElementById(sound).play();
         showOverlay(label.textContent, desc);
       };
 
@@ -241,15 +258,19 @@
 
       const content = document.createElement('div');
       content.className = 'overlay-content';
-      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
-
+      content.innerHTML = `<div>${titulo}</div><div style="margin-top:       content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
       overlay.appendChild(content);
       document.body.appendChild(overlay);
     }
 
     document.getElementById('addBtn').addEventListener('click', createPedido);
+
     document.getElementById('logo').addEventListener('click', () => {
       document.getElementById('logoSound').play();
+      logoClicks++;
+      if (logoClicks >= 5) {
+        document.getElementById('logo').classList.add('rainbow');
+      }
     });
 
     loadPedidos();
