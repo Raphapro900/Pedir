@@ -30,7 +30,7 @@
       border-radius: 10px;
     }
 
-    #addBtn {
+    #addBtn.fx-activate {
       font-size: 1.5em;
       padding: 0.5em;
       width: 100%;
@@ -40,6 +40,18 @@
       border-radius: 5px;
       cursor: pointer;
       font-family: 'riffc';
+      transition: transform 0.3s ease;
+      perspective: 1000px;
+    }
+
+    #addBtn.fx-activate:hover {
+      animation: rotatex 0.6s ease-out;
+    }
+
+    @keyframes rotatex {
+      0%   { transform: rotateX(0deg); }
+      50%  { transform: rotateX(10deg); }
+      100% { transform: rotateX(0deg); }
     }
 
     .pedido {
@@ -102,7 +114,7 @@
 <body>
   <div class="container">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
-    <button id="addBtn">+</button>
+    <button id="addBtn" class="fx-activate">+</button>
     <div id="pedidos"></div>
   </div>
 
