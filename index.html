@@ -28,6 +28,7 @@
       width: 150px;
       margin-bottom: 1em;
       border-radius: 10px;
+      cursor: pointer;
     }
 
     #addBtn.fx-activate {
@@ -119,6 +120,7 @@
   </div>
 
   <audio id="pedidoSound" src="pedido.mp3"></audio>
+  <audio id="logoSound" src="logo.mp3"></audio>
 
   <script>
     let pedidosData = [];
@@ -258,7 +260,8 @@
     }
 
     document.getElementById('addBtn').addEventListener('click', createPedido);
-    loadPedidos();
-  </script>
-</body>
-</html>
+    document.getElementById('logo').addEventListener('click', () => {
+      document.getElementById('logoSound').play();
+    });
+
+    loadPedidos
