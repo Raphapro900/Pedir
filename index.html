@@ -12,28 +12,29 @@
 
     body {
       margin: 0;
-      padding: 0;
+      padding: 1em;
       background-color: #121212;
       color: white;
       font-family: 'riffc', sans-serif;
+      transition: background 1s ease;
     }
 
-    #introVideo {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      z-index: 1000;
-      background: black;
+    body.rainbow-bg {
+      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 1400% 1400%;
+      animation: rainbowBackground 10s ease infinite;
+    }
+
+    @keyframes rainbowBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .container {
       max-width: 400px;
       margin: auto;
       text-align: center;
-      padding: 1em;
-      display: none;
     }
 
     #logo {
@@ -41,6 +42,18 @@
       margin-bottom: 1em;
       border-radius: 10px;
       cursor: pointer;
+      transition: all 0.5s ease;
+    }
+
+    #logo.rainbow {
+      animation: rainbowPulse 2s infinite;
+      filter: hue-rotate(360deg) saturate(2);
+    }
+
+    @keyframes rainbowPulse {
+      0%   { filter: hue-rotate(0deg); }
+      50%  { filter: hue-rotate(180deg); }
+      100% { filter: hue-rotate(360deg); }
     }
 
     #addBtn {
@@ -110,15 +123,63 @@
       80%  { transform: translate(0px, 5px); }
       100% { transform: translate(5px, 5px); }
     }
+
+    #emblemaTexto {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      font-size: 0.9em;
+      background: rgba(0,0,0,0.6);
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-family: 'riffc';
+    }
+
+    #emblemasBtn {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      font-size: 1em;
+      background: #ff4081;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-family: 'riffc';
+    }
+
+    #emblemasPanel {
+      position: fixed;
+      bottom: 50px;
+      right: 10px;
+      background: #222;
+      color: white;
+      border: 1px solid #555;
+      padding: 10px;
+      border-radius: 5px;
+      display: none;
+      font-family: 'riffc';
+      max-width: 300px;
+    }
   </style>
 </head>
 <body>
-  <video id="introVideo" src="intro.mp4" autoplay muted playsinline></video>
-
-  <div class="container" id="mainContent">
+  <div class="container">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
+  </div>
+
+  <div id="emblemaTexto" style="display:none;">Emblema Conseguido: Todo Es arcoiris</div>
+  <button id="emblemasBtn">Emblemas</button>
+  <div id="emblemasPanel">
+    <strong>Emblemas:</strong><br>
+    ✅ Todo Es arcoiris<br>
+    ⬜ 5 pedidos<br>
+    ⬜ Pedido secreto<br>
+    ⬜ Logo oculto<br>
+    ⬜ Modo noche<br>
   </div>
 
   <audio id="pedidoSound" src="pedido.mp3"></audio>
@@ -126,6 +187,9 @@
 
   <script>
     let pedidosData = [];
+    let logoClicks = 0;
+    let logoRainbow = false;
+    let fondoRainbow = false;
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -159,35 +223,6 @@
       savePedidos();
     }
 
-    function createPedido() {
-      const pedidoDiv = document.createElement('div');
-      pedidoDiv.className = 'pedido';
-
-      const label = document.createElement('span');
-      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Descripción...';
-
-      const doneBtn = document.createElement('button');
-      doneBtn.textContent = '✔';
-      doneBtn.onclick = () => {
-        const desc = input.value.trim();
-        if (!desc) return;
-        pedidosData.push(desc);
-        savePedidos();
-        input.remove();
-        doneBtn.remove();
-        renderPedido(pedidosData.length, desc, pedidoDiv);
-      };
-
-      pedidoDiv.appendChild(label);
-      pedidoDiv.appendChild(input);
-      pedidoDiv.appendChild(doneBtn);
-      document.getElementById('pedidos').appendChild(pedidoDiv);
-    }
-
     function renderPedido(num, desc, container = null) {
       const pedidoDiv = container || document.createElement('div');
       pedidoDiv.className = 'pedido';
@@ -199,7 +234,26 @@
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
       pedidoBtn.onclick = () => {
-        document.getElementById('pedidoSound').play();
+        const trigger = ['mcdonald\'s', 'mcdonalds', 'donald mac donald', 'donald mcdonald', 'donald mc donald'];
+        const arcoiris = ['rainbow', 'arcoiris'];
+        const text = desc.toLowerCase();
+
+        if (trigger.some(w => text.includes(w))) {
+          document.getElementById('logoSound').play();
+        } else {
+          document.getElementById('pedidoSound').play();
+        }
+
+        if (arcoiris.some(w => text.includes(w))) {
+          document.body.classList.add('rainbow-bg');
+          fondoRainbow = true;
+          if (!logoRainbow) {
+            document.getElementById('logo').classList.add('rainbow');
+            logoRainbow = true;
+          }
+          document.getElementById('emblemaTexto').style.display = 'block';
+        }
+
         showOverlay(label.textContent, desc);
       };
 
@@ -223,7 +277,7 @@
           savePedidos();
           input.remove();
           doneBtn.remove();
-          renderPedido(num, newDesc, pedidoDiv);
+          renderPedido          renderPedido(num, newDesc, pedidoDiv);
         };
 
         pedidoDiv.appendChild(input);
@@ -261,13 +315,19 @@
     }
 
     document.getElementById('addBtn').addEventListener('click', createPedido);
+
     document.getElementById('logo').addEventListener('click', () => {
+      logoClicks++;
+      if (logoClicks >= 5 && !logoRainbow) {
+        document.getElementById('logo').classList.add('rainbow');
+        logoRainbow = true;
+      }
       document.getElementById('logoSound').play();
     });
 
-    document.getElementById('introVideo').addEventListener('ended', () => {
-      document.getElementById('introVideo').remove();
-      document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('emblemasBtn').addEventListener('click', () => {
+      const panel = document.getElementById('emblemasPanel');
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
     });
 
     loadPedidos();
