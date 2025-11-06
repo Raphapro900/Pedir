@@ -133,34 +133,7 @@
       padding: 5px 10px;
       border-radius: 5px;
       font-family: 'riffc';
-    }
-
-    #emblemasBtn {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      font-size: 1em;
-      background: #ff4081;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 6px 12px;
-      cursor: pointer;
-      font-family: 'riffc';
-    }
-
-    #emblemasPanel {
-      position: fixed;
-      bottom: 50px;
-      right: 10px;
-      background: #222;
-      color: white;
-      border: 1px solid #555;
-      padding: 10px;
-      border-radius: 5px;
       display: none;
-      font-family: 'riffc';
-      max-width: 300px;
     }
   </style>
 </head>
@@ -171,16 +144,7 @@
     <div id="pedidos"></div>
   </div>
 
-  <div id="emblemaTexto" style="display:none;">Emblema Conseguido: Todo Es arcoiris</div>
-  <button id="emblemasBtn">Emblemas</button>
-  <div id="emblemasPanel">
-    <strong>Emblemas:</strong><br>
-    ✅ Todo Es arcoiris<br>
-    ⬜ 5 pedidos<br>
-    ⬜ Pedido secreto<br>
-    ⬜ Logo oculto<br>
-    ⬜ Modo noche<br>
-  </div>
+  <div id="emblemaTexto">Emblema Conseguido: Todo Es arcoiris</div>
 
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
@@ -277,7 +241,7 @@
           savePedidos();
           input.remove();
           doneBtn.remove();
-          renderPedido          renderPedido(num, newDesc, pedidoDiv);
+          renderPedido(num, newDesc, pedidoDiv);
         };
 
         pedidoDiv.appendChild(input);
@@ -314,23 +278,47 @@
       document.body.appendChild(overlay);
     }
 
-    document.getElementById('addBtn').addEventListener('click', createPedido);
+      document.getElementById('addBtn').addEventListener('click', () => {
+        const pedidoDiv = document.createElement('div');
+        pedidoDiv.className = 'pedido';
 
-    document.getElementById('logo').addEventListener('click', () => {
-      logoClicks++;
-      if (logoClicks >= 5 && !logoRainbow) {
-        document.getElementById('logo').classList.add('rainbow');
-        logoRainbow = true;
-      }
-      document.getElementById('logoSound').play();
-    });
+        const label = document.createElement('span');
+        label.textContent = `Pedido ${getNextPedidoNumber()}:`;
 
-    document.getElementById('emblemasBtn').addEventListener('click', () => {
-      const panel = document.getElementById('emblemasPanel');
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    });
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Descripción...';
 
-    loadPedidos();
-  </script>
-</body>
+        const doneBtn = document.createElement('button');
+        doneBtn.textContent = '✔';
+        doneBtn.onclick = () => {
+          const desc = input.value.trim();
+          if (!desc) return;
+
+          pedidosData.push(desc);
+          savePedidos();
+          input.remove();
+          doneBtn.remove();
+          renderPedido(pedidosData.length, desc, pedidoDiv);
+        };
+
+        pedidoDiv.appendChild(label);
+        pedidoDiv.appendChild(input);
+        pedidoDiv.appendChild(doneBtn);
+        document.getElementById('pedidos').appendChild(pedidoDiv);
+      });
+
+      document.getElementById('logo').addEventListener('click', () => {
+        logoClicks++;
+        if (logoClicks >= 5 && !logoRainbow) {
+          document.getElementById('logo').classList.add('rainbow');
+          logoRainbow = true;
+        }
+        document.getElementById('logoSound').play();
+      });
+
+      loadPedidos();
+    </script>
+  </body>
 </html>
+(
