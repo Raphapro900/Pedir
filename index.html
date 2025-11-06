@@ -12,29 +12,28 @@
 
     body {
       margin: 0;
-      padding: 1em;
+      padding: 0;
       background-color: #121212;
       color: white;
       font-family: 'riffc', sans-serif;
-      transition: background 1s ease;
     }
 
-    body.rainbow-bg {
-      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
-      background-size: 1400% 1400%;
-      animation: rainbowBackground 10s ease infinite;
-    }
-
-    @keyframes rainbowBackground {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    #introVideo {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: 1000;
+      background: black;
     }
 
     .container {
       max-width: 400px;
       margin: auto;
       text-align: center;
+      padding: 1em;
+      display: none;
     }
 
     #logo {
@@ -42,18 +41,6 @@
       margin-bottom: 1em;
       border-radius: 10px;
       cursor: pointer;
-      transition: all 0.5s ease;
-    }
-
-    #logo.rainbow {
-      animation: rainbowPulse 2s infinite;
-      filter: hue-rotate(360deg) saturate(2);
-    }
-
-    @keyframes rainbowPulse {
-      0%   { filter: hue-rotate(0deg); }
-      50%  { filter: hue-rotate(180deg); }
-      100% { filter: hue-rotate(360deg); }
     }
 
     #addBtn {
@@ -106,7 +93,7 @@
       text-align: center;
       font-size: 2em;
       font-family: 'riffc';
-      animation: zoomIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards, shakeLoop 2s infinite;
+      animation: zoomIn 2s ease forwards, shakeLoop 2s infinite;
       transform: scale(0);
     }
 
@@ -126,22 +113,19 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <video id="introVideo" src="intro.mp4" autoplay muted playsinline></video>
+
+  <div class="container" id="mainContent">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
   </div>
 
-  <audio id="pedidoSound1" src="pedido.mp3"></audio>
-  <audio id="pedidoSound2" src="pedido_4up.mp3"></audio>
-  <audio id="pedidoSound3" src="pedido_12up.mp3"></audio>
+  <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
-  <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
 
   <script>
     let pedidosData = [];
-    let logoClicks = 0;
-    let isRainbowMode = false;
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -175,15 +159,6 @@
       savePedidos();
     }
 
-    function activateRainbowMode() {
-      if (!isRainbowMode) {
-        isRainbowMode = true;
-        document.body.classList.add('rainbow-bg');
-        document.getElementById('logo').classList.add('rainbow');
-        document.getElementById('rainbowSound').play();
-      }
-    }
-
     function createPedido() {
       const pedidoDiv = document.createElement('div');
       pedidoDiv.className = 'pedido';
@@ -200,11 +175,6 @@
       doneBtn.onclick = () => {
         const desc = input.value.trim();
         if (!desc) return;
-
-        if (desc.toLowerCase().includes('rainbow') || desc.toLowerCase().includes('arcoiris')) {
-          activateRainbowMode();
-        }
-
         pedidosData.push(desc);
         savePedidos();
         input.remove();
@@ -229,13 +199,7 @@
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
       pedidoBtn.onclick = () => {
-        if (isRainbowMode) {
-          document.getElementById('pedidoSound1').play();
-          document.getElementById('pedidoSound2').play();
-          document.getElementById('pedidoSound3').play();
-        } else {
-          document.getElementById('pedidoSound1').play();
-        }
+        document.getElementById('pedidoSound').play();
         showOverlay(label.textContent, desc);
       };
 
@@ -255,11 +219,6 @@
         doneBtn.onclick = () => {
           const newDesc = input.value.trim();
           if (!newDesc) return;
-
-          if (newDesc.toLowerCase().includes('rainbow') || newDesc.toLowerCase().includes('arcoiris')) {
-            activateRainbowMode();
-          }
-
           pedidosData[num - 1] = newDesc;
           savePedidos();
           input.remove();
@@ -302,18 +261,13 @@
     }
 
     document.getElementById('addBtn').addEventListener('click', createPedido);
-
     document.getElementById('logo').addEventListener('click', () => {
-      logoClicks++;
-      if (logoClicks >= 5 && !isRainbowMode) {
-        activateRainbowMode();
-      } else {
-        if (isRainbowMode) {
-          document.getElementById('rainbowSound').play();
-        } else {
-          document.getElementById('logoSound').play();
-        }
-      }
+      document.getElementById('logoSound').play();
+    });
+
+    document.getElementById('introVideo').addEventListener('ended', () => {
+      document.getElementById('introVideo').remove();
+      document.getElementById('mainContent').style.display = 'block';
     });
 
     loadPedidos();
