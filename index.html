@@ -12,42 +12,29 @@
 
     body {
       margin: 0;
-      padding: 0;
+      padding: 1em;
       background-color: #121212;
       color: white;
       font-family: 'bebas', sans-serif;
-      overflow: hidden;
+      transition: background 1s ease;
     }
 
-    #pantallaInicio {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      flex-direction: column;
+    body.rainbow-bg {
+      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 1400% 1400%;
+      animation: rainbowBackground 10s ease infinite;
     }
 
-    #pantallaInicio button {
-      font-size: 2em;
-      padding: 0.5em 1em;
-      background: #00c853;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-family: 'bebas';
+    @keyframes rainbowBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     .container {
       max-width: 400px;
       margin: auto;
       text-align: center;
-      padding: 1em;
-      display: none;
     }
 
     #logo {
@@ -67,18 +54,6 @@
       0%   { filter: hue-rotate(0deg); }
       50%  { filter: hue-rotate(180deg); }
       100% { filter: hue-rotate(360deg); }
-    }
-
-    body.rainbow-bg {
-      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
-      background-size: 1400% 1400%;
-      animation: rainbowBackground 10s ease infinite;
-    }
-
-    @keyframes rainbowBackground {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
     }
 
     #addBtn {
@@ -165,11 +140,7 @@
   </style>
 </head>
 <body>
-  <div id="pantallaInicio">
-    <button id="empezarBtn">Empezar a jugar</button>
-  </div>
-
-  <div class="container" id="appContainer">
+  <div class="container">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
@@ -178,20 +149,14 @@
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
   <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
-  <audio id="fondoMusica" src="fondo.mp3" autoplay loop muted></audio>
-  <button id="toggleMusica">Activar música</button>
+  <audio id="fondoMusica" src="fondo.mp3" autoplay loop></audio>
+  <button id="toggleMusica">Silenciar música</button>
 
   <script>
     let pedidosData = [];
     let logoClicks = 0;
     let logoRainbow = false;
     let fondoRainbow = false;
-
-    document.getElementById('empezarBtn').addEventListener('click', () => {
-      document.getElementById('pantallaInicio').style.display = 'none';
-      document.getElementById('appContainer').style.display = 'block';
-      document.body.style.overflow = 'auto';
-    });
 
     document.getElementById('toggleMusica').addEventListener('click', () => {
       const fondoMusica = document.getElementById('fondoMusica');
@@ -266,7 +231,8 @@
           label.textContent = `Pedido ${index + 1}:`;
           const desc = btn.textContent.split(': ')[1];
           btn.textContent = `Pedido ${index + 1}: ${desc}`;
-        pedidosData.push(desc);
+          pedidosData.push(desc);
+        }
       });
       savePedidos();
     }
@@ -294,7 +260,7 @@
             logoRainbow = true;
           }
           document.getElementById('rainbowSound').play();
-        } else if (trigger.some(w => text.includes(w))) {
+        } else if (trigger.some(w => text        .includes(w))) {
           if (fondoRainbow || logoRainbow) {
             document.getElementById('rainbowSound').play();
           } else {
