@@ -123,6 +123,19 @@
       80%  { transform: translate(0px, 5px); }
       100% { transform: translate(5px, 5px); }
     }
+
+    #toggleMusica {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      font-family: 'bebas';
+      padding: 6px 12px;
+      background: #00c853;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -135,6 +148,8 @@
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
   <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
+  <audio id="fondoMusica" src="fondo.mp3" autoplay loop></audio>
+  <button id="toggleMusica">Silenciar música</button>
 
   <script>
     let pedidosData = [];
@@ -306,6 +321,14 @@
       } else {
         document.getElementById('logoSound').play();
       }
+    });
+
+    const fondoMusica = document.getElementById('fondoMusica');
+    const toggleMusica = document.getElementById('toggleMusica');
+
+    toggleMusica.addEventListener('click', () => {
+      fondoMusica.muted = !fondoMusica.muted;
+      toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
     });
 
     loadPedidos();
