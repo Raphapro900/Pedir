@@ -6,8 +6,8 @@
   <title>Pedidos Remixables</title>
   <style>
     @font-face {
-      font-family: 'riffc';
-      src: url('RifficFree-Bold.ttf') format('truetype');
+      font-family: 'bebas';
+      src: url('BebasNeue-Regular.ttf') format('truetype');
     }
 
     body {
@@ -15,7 +15,7 @@
       padding: 1em;
       background-color: #121212;
       color: white;
-      font-family: 'riffc', sans-serif;
+      font-family: 'bebas', sans-serif;
       transition: background 1s ease;
     }
 
@@ -65,7 +65,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      font-family: 'riffc';
+      font-family: 'bebas';
     }
 
     .pedido {
@@ -82,12 +82,12 @@
       flex: 1;
       padding: 5px;
       font-size: 1em;
-      font-family: 'riffc';
+      font-family: 'bebas';
     }
 
     .pedido button {
       margin-left: 5px;
-      font-family: 'riffc';
+      font-family: 'bebas';
     }
 
     .overlay {
@@ -105,7 +105,7 @@
       color: white;
       text-align: center;
       font-size: 2em;
-      font-family: 'riffc';
+      font-family: 'bebas';
       animation: zoomIn 2s ease forwards, shakeLoop 2s infinite;
       transform: scale(0);
     }
@@ -123,18 +123,6 @@
       80%  { transform: translate(0px, 5px); }
       100% { transform: translate(5px, 5px); }
     }
-
-    #emblemaTexto {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      font-size: 0.9em;
-      background: rgba(0,0,0,0.6);
-      padding: 5px 10px;
-      border-radius: 5px;
-      font-family: 'riffc';
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -144,10 +132,9 @@
     <div id="pedidos"></div>
   </div>
 
-  <div id="emblemaTexto">Emblema Conseguido: Todo Es arcoiris</div>
-
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
+  <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
 
   <script>
     let pedidosData = [];
@@ -202,12 +189,6 @@
         const arcoiris = ['rainbow', 'arcoiris'];
         const text = desc.toLowerCase();
 
-        if (trigger.some(w => text.includes(w))) {
-          document.getElementById('logoSound').play();
-        } else {
-          document.getElementById('pedidoSound').play();
-        }
-
         if (arcoiris.some(w => text.includes(w))) {
           document.body.classList.add('rainbow-bg');
           fondoRainbow = true;
@@ -215,7 +196,15 @@
             document.getElementById('logo').classList.add('rainbow');
             logoRainbow = true;
           }
-          document.getElementById('emblemaTexto').style.display = 'block';
+          document.getElementById('rainbowSound').play();
+        } else if (trigger.some(w => text.includes(w))) {
+          if (fondoRainbow || logoRainbow) {
+            document.getElementById('rainbowSound').play();
+          } else {
+            document.getElementById('logoSound').play();
+          }
+        } else {
+          document.getElementById('pedidoSound').play();
         }
 
         showOverlay(label.textContent, desc);
@@ -278,46 +267,48 @@
       document.body.appendChild(overlay);
     }
 
-      document.getElementById('addBtn').addEventListener('click', () => {
-        const pedidoDiv = document.createElement('div');
-        pedidoDiv.className = 'pedido';
+    document.getElementById('addBtn').addEventListener('click', () => {
+      const pedidoDiv = document.createElement('div');
+      pedidoDiv.className = 'pedido';
 
-        const label = document.createElement('span');
-        label.textContent = `Pedido ${getNextPedidoNumber()}:`;
+      const label = document.createElement('span');
+      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
 
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = 'Descripción...';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Descripción...';
 
-        const doneBtn = document.createElement('button');
-        doneBtn.textContent = '✔';
-        doneBtn.onclick = () => {
-          const desc = input.value.trim();
-          if (!desc) return;
+      const doneBtn = document.createElement('button');
+      doneBtn.textContent = '✔';
+      doneBtn.onclick = () => {
+        const desc = input.value.trim();
+        if (!desc) return;
 
-          pedidosData.push(desc);
-          savePedidos();
-          input.remove();
-          doneBtn.remove();
-          renderPedido(pedidosData.length, desc, pedidoDiv);
-        };
+        pedidosData.push(desc);
+        savePedidos();
+        input.remove();
+        doneBtn.remove();
+        renderPedido(pedidosData.length, desc, pedidoDiv);
+      };
 
-        pedidoDiv.appendChild(label);
-        pedidoDiv.appendChild(input);
-        pedidoDiv.appendChild(doneBtn);
-        document.getElementById('pedidos').appendChild(pedidoDiv);
-      });
+      pedidoDiv.appendChild(label);
+      pedidoDiv.appendChild(input);
+      pedidoDiv.appendChild(doneBtn);
+      document.getElementById('pedidos').appendChild(pedidoDiv);
+    });
 
-      document.getElementById('logo').addEventListener('click', () => {
-        logoClicks++;
-        if (logoClicks >= 5 && !logoRainbow) {
-          document.getElementById('logo').classList.add('rainbow');
-          logoRainbow = true;
-        }
+    document.getElementById('logo').addEventListener('click', () => {
+      logoClicks++;
+      if (logoClicks >= 5 && !logoRainbow) {
+        document.getElementById('logo').classList.add('rainbow');
+        logoRainbow = true;
+        document.getElementById('rainbowSound').play();
+      } else {
         document.getElementById('logoSound').play();
-      });
+      }
+    });
 
-      loadPedidos();
-    </script>
-  </body>
+    loadPedidos();
+  </script>
+</body>
 </html>
