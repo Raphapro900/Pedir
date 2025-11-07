@@ -149,188 +149,194 @@
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
   <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
-  <audio id="fondoMusica" src="fondo.mp3" autoplay loop></audio>
+  <audio id="fondoMusica" src="fondo.mp3" loop></audio>
   <button id="toggleMusica">Silenciar música</button>
+<script>
+  let pedidosData = [];
+  let logoClicks = 0;
+  let logoRainbow = false;
+  let fondoRainbow = false;
 
-  <script>
-    let pedidosData = [];
-    let logoClicks = 0;
-    let logoRainbow = false;
-    let fondoRainbow = false;
-
-    document.getElementById('toggleMusica').addEventListener('click', () => {
+  // Reproducir música de fondo 1 segundo después de cargar
+  window.addEventListener('load', () => {
+    setTimeout(() => {
       const fondoMusica = document.getElementById('fondoMusica');
-      fondoMusica.muted = !fondoMusica.muted;
-      toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
+      fondoMusica.play().catch(() => {});
+    }, 1000);
+  });
+
+  document.getElementById('toggleMusica').addEventListener('click', () => {
+    const fondoMusica = document.getElementById('fondoMusica');
+    fondoMusica.muted = !fondoMusica.muted;
+    toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
+  });
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    const pedidoDiv = document.createElement('div');
+    pedidoDiv.className = 'pedido';
+
+    const label = document.createElement('span');
+    label.textContent = `Pedido ${getNextPedidoNumber()}:`;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Descripción...';
+
+    const doneBtn = document.createElement('button');
+    doneBtn.textContent = '✔';
+    doneBtn.onclick = () => {
+      const desc = input.value.trim();
+      if (!desc) return;
+
+      pedidosData.push(desc);
+      savePedidos();
+      input.remove();
+      doneBtn.remove();
+      renderPedido(pedidosData.length, desc, pedidoDiv);
+    };
+
+    pedidoDiv.appendChild(label);
+    pedidoDiv.appendChild(input);
+    pedidoDiv.appendChild(doneBtn);
+    document.getElementById('pedidos').appendChild(pedidoDiv);
+  });
+
+  document.getElementById('logo').addEventListener('click', () => {
+    logoClicks++;
+    if (logoClicks >= 5 && !logoRainbow) {
+      document.getElementById('logo').classList.add('rainbow');
+      logoRainbow = true;
+      document.getElementById('rainbowSound').play();
+    } else {
+      document.getElementById('logoSound').play();
+    }
+  });
+
+  function savePedidos() {
+    localStorage.setItem('pedidos', JSON.stringify(pedidosData));
+  }
+
+  function loadPedidos() {
+    const stored = localStorage.getItem('pedidos');
+    if (stored) {
+      pedidosData = JSON.parse(stored);
+      pedidosData.forEach((desc, i) => renderPedido(i + 1, desc));
+    }
+  }
+
+  function getNextPedidoNumber() {
+    return pedidosData.length + 1;
+  }
+
+  function updatePedidoNumbers() {
+    const allPedidos = document.querySelectorAll('.pedido');
+    pedidosData = [];
+    allPedidos.forEach((pedido, index) => {
+      const label = pedido.querySelector('span');
+      const btn = pedido.querySelector('button');
+      if (label && btn && !btn.textContent.includes('✎')) {
+        label.textContent = `Pedido ${index + 1}:`;
+        const desc = btn.textContent.split(': ')[1];
+        btn.textContent = `Pedido ${index + 1}: ${desc}`;
+        pedidosData.push(desc);
+      }
     });
+    savePedidos();
+  }
+  function renderPedido(num, desc, container = null) {
+    const pedidoDiv = container || document.createElement('div');
+    pedidoDiv.className = 'pedido';
+    pedidoDiv.innerHTML = '';
 
-    document.getElementById('addBtn').addEventListener('click', () => {
-      const pedidoDiv = document.createElement('div');
-      pedidoDiv.className = 'pedido';
+    const label = document.createElement('span');
+    label.textContent = `Pedido ${num}:`;
 
-      const label = document.createElement('span');
-      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
+    const pedidoBtn = document.createElement('button');
+    pedidoBtn.textContent = `${label.textContent} ${desc}`;
+    pedidoBtn.onclick = () => {
+      const trigger = ['mcdonald\'s', 'mcdonalds', 'donald mac donald', 'donald mcdonald', 'donald mc donald'];
+      const arcoiris = ['rainbow', 'arcoiris'];
+      const text = desc.toLowerCase();
+
+      if (arcoiris.some(w => text.includes(w))) {
+        document.body.classList.add('rainbow-bg');
+        fondoRainbow = true;
+        if (!logoRainbow) {
+          document.getElementById('logo').classList.add('rainbow');
+          logoRainbow = true;
+        }
+        document.getElementById('rainbowSound').play();
+      } else if (trigger.some(w => text.includes(w))) {
+        if (fondoRainbow || logoRainbow) {
+          document.getElementById('rainbowSound').play();
+        } else {
+          document.getElementById('logoSound').play();
+        }
+      } else {
+        document.getElementById('pedidoSound').play();
+      }
+
+      showOverlay(label.textContent, desc);
+    };
+
+    const editBtn = document.createElement('button');
+    editBtn.textContent = '✎';
+    editBtn.onclick = () => {
+      pedidoBtn.remove();
+      editBtn.remove();
+      deleteBtn.remove();
 
       const input = document.createElement('input');
       input.type = 'text';
-      input.placeholder = 'Descripción...';
+      input.value = desc;
 
       const doneBtn = document.createElement('button');
       doneBtn.textContent = '✔';
       doneBtn.onclick = () => {
-        const desc = input.value.trim();
-        if (!desc) return;
-
-        pedidosData.push(desc);
+        const newDesc = input.value.trim();
+        if (!newDesc) return;
+        pedidosData[num - 1] = newDesc;
         savePedidos();
         input.remove();
         doneBtn.remove();
-        renderPedido(pedidosData.length, desc, pedidoDiv);
+        renderPedido(num, newDesc, pedidoDiv);
       };
 
-      pedidoDiv.appendChild(label);
       pedidoDiv.appendChild(input);
       pedidoDiv.appendChild(doneBtn);
+    };
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '🗑';
+    deleteBtn.onclick = () => {
+      pedidoDiv.remove();
+      pedidosData.splice(num - 1, 1);
+      updatePedidoNumbers();
+    };
+
+    pedidoDiv.appendChild(label);
+    pedidoDiv.appendChild(pedidoBtn);
+    pedidoDiv.appendChild(editBtn);
+    pedidoDiv.appendChild(deleteBtn);
+
+    if (!container) {
       document.getElementById('pedidos').appendChild(pedidoDiv);
-    });
-
-    document.getElementById('logo').addEventListener('click', () => {
-      logoClicks++;
-      if (logoClicks >= 5 && !logoRainbow) {
-        document.getElementById('logo').classList.add('rainbow');
-        logoRainbow = true;
-        document.getElementById('rainbowSound').play();
-      } else {
-        document.getElementById('logoSound').play();
-      }
-    });
-
-    function savePedidos() {
-      localStorage.setItem('pedidos', JSON.stringify(pedidosData));
     }
+  }
 
-    function loadPedidos() {
-      const stored = localStorage.getItem('pedidos');
-      if (stored) {
-        pedidosData = JSON.parse(stored);
-        pedidosData.forEach((desc, i) => renderPedido(i + 1, desc));
-      }
-    }
+  function showOverlay(titulo, descripcion) {
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.onclick = () => overlay.remove();
 
-    function getNextPedidoNumber() {
-      return pedidosData.length + 1;
-    }
+    const content = document.createElement('div');
+    content.className = 'overlay-content';
+    content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
+    overlay.appendChild(content);
+    document.body.appendChild(overlay);
+  }
 
-    function updatePedidoNumbers() {
-      const allPedidos = document.querySelectorAll('.pedido');
-      pedidosData = [];
-      allPedidos.forEach((pedido, index) => {
-        const label = pedido.querySelector('span');
-        const btn = pedido.querySelector('button');
-        if (label && btn && !btn.textContent.includes('✎')) {
-          label.textContent = `Pedido ${index + 1}:`;
-          const desc = btn.textContent.split(': ')[1];
-          btn.textContent = `Pedido ${index + 1}: ${desc}`;
-          pedidosData.push(desc);
-        }
-      });
-      savePedidos();
-    }
-
-    function renderPedido(num, desc, container = null) {
-      const pedidoDiv = container || document.createElement('div');
-      pedidoDiv.className = 'pedido';
-      pedidoDiv.innerHTML = '';
-
-      const label = document.createElement('span');
-      label.textContent = `Pedido ${num}:`;
-
-      const pedidoBtn = document.createElement('button');
-      pedidoBtn.textContent = `${label.textContent} ${desc}`;
-      pedidoBtn.onclick = () => {
-        const trigger = ['mcdonald\'s', 'mcdonalds', 'donald mac donald', 'donald mcdonald', 'donald mc donald'];
-        const arcoiris = ['rainbow', 'arcoiris'];
-        const text = desc.toLowerCase();
-
-        if (arcoiris.some(w => text.includes(w))) {
-          document.body.classList.add('rainbow-bg');
-          fondoRainbow = true;
-          if (!logoRainbow) {
-            document.getElementById('logo').classList.add('rainbow');
-            logoRainbow = true;
-          }
-          document.getElementById('rainbowSound').play();
-        } else if (trigger.some(w => text        .includes(w))) {
-          if (fondoRainbow || logoRainbow) {
-            document.getElementById('rainbowSound').play();
-          } else {
-            document.getElementById('logoSound').play();
-          }
-        } else {
-          document.getElementById('pedidoSound').play();
-        }
-
-        showOverlay(label.textContent, desc);
-      };
-
-      const editBtn = document.createElement('button');
-      editBtn.textContent = '✎';
-      editBtn.onclick = () => {
-        pedidoBtn.remove();
-        editBtn.remove();
-        deleteBtn.remove();
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = desc;
-
-        const doneBtn = document.createElement('button');
-        doneBtn.textContent = '✔';
-        doneBtn.onclick = () => {
-          const newDesc = input.value.trim();
-          if (!newDesc) return;
-          pedidosData[num - 1] = newDesc;
-          savePedidos();
-          input.remove();
-          doneBtn.remove();
-          renderPedido(num, newDesc, pedidoDiv);
-        };
-
-        pedidoDiv.appendChild(input);
-        pedidoDiv.appendChild(doneBtn);
-      };
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = '🗑';
-      deleteBtn.onclick = () => {
-        pedidoDiv.remove();
-        pedidosData.splice(num - 1, 1);
-        updatePedidoNumbers();
-      };
-
-      pedidoDiv.appendChild(label);
-      pedidoDiv.appendChild(pedidoBtn);
-      pedidoDiv.appendChild(editBtn);
-      pedidoDiv.appendChild(deleteBtn);
-
-      if (!container) {
-        document.getElementById('pedidos').appendChild(pedidoDiv);
-      }
-    }
-
-    function showOverlay(titulo, descripcion) {
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      overlay.onclick = () => overlay.remove();
-
-      const content = document.createElement('div');
-      content.className = 'overlay-content';
-      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
-      overlay.appendChild(content);
-      document.body.appendChild(overlay);
-    }
-
-    loadPedidos();
-  </script>
+  loadPedidos();
+</script>
 </body>
 </html>
