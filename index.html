@@ -12,29 +12,42 @@
 
     body {
       margin: 0;
-      padding: 1em;
+      padding: 0;
       background-color: #121212;
       color: white;
       font-family: 'bebas', sans-serif;
-      transition: background 1s ease;
+      overflow: hidden;
     }
 
-    body.rainbow-bg {
-      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
-      background-size: 1400% 1400%;
-      animation: rainbowBackground 10s ease infinite;
+    #pantallaInicio {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      flex-direction: column;
     }
 
-    @keyframes rainbowBackground {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    #pantallaInicio button {
+      font-size: 2em;
+      padding: 0.5em 1em;
+      background: #00c853;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'bebas';
     }
 
     .container {
       max-width: 400px;
       margin: auto;
       text-align: center;
+      padding: 1em;
+      display: none;
     }
 
     #logo {
@@ -54,6 +67,18 @@
       0%   { filter: hue-rotate(0deg); }
       50%  { filter: hue-rotate(180deg); }
       100% { filter: hue-rotate(360deg); }
+    }
+
+    body.rainbow-bg {
+      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
+      background-size: 1400% 1400%;
+      animation: rainbowBackground 10s ease infinite;
+    }
+
+    @keyframes rainbowBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     #addBtn {
@@ -135,11 +160,16 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      z-index: 1001;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="pantallaInicio">
+    <button id="empezarBtn">Empezar a jugar</button>
+  </div>
+
+  <div class="container" id="appContainer">
     <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
@@ -156,6 +186,59 @@
     let logoClicks = 0;
     let logoRainbow = false;
     let fondoRainbow = false;
+
+    document.getElementById('empezarBtn').addEventListener('click', () => {
+      document.getElementById('pantallaInicio').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      document.body.style.overflow = 'auto';
+    });
+
+    document.getElementById('toggleMusica').addEventListener('click', () => {
+      const fondoMusica = document.getElementById('fondoMusica');
+      fondoMusica.muted = !fondoMusica.muted;
+      toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
+    });
+
+    document.getElementById('addBtn').addEventListener('click', () => {
+      const pedidoDiv = document.createElement('div');
+      pedidoDiv.className = 'pedido';
+
+      const label = document.createElement('span');
+      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'Descripción...';
+
+      const doneBtn = document.createElement('button');
+      doneBtn.textContent = '✔';
+      doneBtn.onclick = () => {
+        const desc = input.value.trim();
+        if (!desc) return;
+
+        pedidosData.push(desc);
+        savePedidos();
+        input.remove();
+        doneBtn.remove();
+        renderPedido(pedidosData.length, desc, pedidoDiv);
+      };
+
+      pedidoDiv.appendChild(label);
+      pedidoDiv.appendChild(input);
+      pedidoDiv.appendChild(doneBtn);
+      document.getElementById('pedidos').appendChild(pedidoDiv);
+    });
+
+    document.getElementById('logo').addEventListener('click', () => {
+      logoClicks++;
+      if (logoClicks >= 5 && !logoRainbow) {
+        document.getElementById('logo').classList.add('rainbow');
+        logoRainbow = true;
+        document.getElementById('rainbowSound').play();
+      } else {
+        document.getElementById('logoSound').play();
+      }
+    });
 
     function savePedidos() {
       localStorage.setItem('pedidos', JSON.stringify(pedidosData));
@@ -183,8 +266,7 @@
           label.textContent = `Pedido ${index + 1}:`;
           const desc = btn.textContent.split(': ')[1];
           btn.textContent = `Pedido ${index + 1}: ${desc}`;
-          pedidosData.push(desc);
-        }
+        pedidosData.push(desc);
       });
       savePedidos();
     }
@@ -277,61 +359,12 @@
 
       const content = document.createElement('div');
       content.className = 'overlay-content';
-        content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
-        overlay.appendChild(content);
-        document.body.appendChild(overlay);
-      }
+      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
+    }
 
-      document.getElementById('addBtn').addEventListener('click', () => {
-        const pedidoDiv = document.createElement('div');
-        pedidoDiv.className = 'pedido';
-
-        const label = document.createElement('span');
-        label.textContent = `Pedido ${getNextPedidoNumber()}:`;
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = 'Descripción...';
-
-        const doneBtn = document.createElement('button');
-        doneBtn.textContent = '✔';
-        doneBtn.onclick = () => {
-          const desc = input.value.trim();
-          if (!desc) return;
-
-          pedidosData.push(desc);
-          savePedidos();
-          input.remove();
-          doneBtn.remove();
-          renderPedido(pedidosData.length, desc, pedidoDiv);
-        };
-
-        pedidoDiv.appendChild(label);
-        pedidoDiv.appendChild(input);
-        pedidoDiv.appendChild(doneBtn);
-        document.getElementById('pedidos').appendChild(pedidoDiv);
-      });
-
-      document.getElementById('logo').addEventListener('click', () => {
-        logoClicks++;
-        if (logoClicks >= 5 && !logoRainbow) {
-          document.getElementById('logo').classList.add('rainbow');
-          logoRainbow = true;
-          document.getElementById('rainbowSound').play();
-        } else {
-          document.getElementById('logoSound').play();
-        }
-      });
-
-      const fondoMusica = document.getElementById('fondoMusica');
-      const toggleMusica = document.getElementById('toggleMusica');
-
-      toggleMusica.addEventListener('click', () => {
-        fondoMusica.muted = !fondoMusica.muted;
-        toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
-      });
-
-      loadPedidos();
-    </script>
-  </body>
+    loadPedidos();
+  </script>
+</body>
 </html>
