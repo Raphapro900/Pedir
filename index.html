@@ -148,8 +148,8 @@
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
   <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
-  <audio id="fondoMusica" src="fondo.mp3" autoplay loop></audio>
-  <button id="toggleMusica">Silenciar música</button>
+  <audio id="fondoMusica" src="fondo.mp3" autoplay loop muted></audio>
+  <button id="toggleMusica">Activar música</button>
 
   <script>
     let pedidosData = [];
@@ -277,61 +277,61 @@
 
       const content = document.createElement('div');
       content.className = 'overlay-content';
-      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
-      overlay.appendChild(content);
-      document.body.appendChild(overlay);
-    }
-
-    document.getElementById('addBtn').addEventListener('click', () => {
-      const pedidoDiv = document.createElement('div');
-      pedidoDiv.className = 'pedido';
-
-      const label = document.createElement('span');
-      label.textContent = `Pedido ${getNextPedidoNumber()}:`;
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Descripción...';
-
-      const doneBtn = document.createElement('button');
-      doneBtn.textContent = '✔';
-      doneBtn.onclick = () => {
-        const desc = input.value.trim();
-        if (!desc) return;
-
-        pedidosData.push(desc);
-        savePedidos();
-        input.remove();
-        doneBtn.remove();
-        renderPedido(pedidosData.length, desc, pedidoDiv);
-      };
-
-      pedidoDiv.appendChild(label);
-      pedidoDiv.appendChild(input);
-      pedidoDiv.appendChild(doneBtn);
-      document.getElementById('pedidos').appendChild(pedidoDiv);
-    });
-
-    document.getElementById('logo').addEventListener('click', () => {
-      logoClicks++;
-      if (logoClicks >= 5 && !logoRainbow) {
-        document.getElementById('logo').classList.add('rainbow');
-        logoRainbow = true;
-        document.getElementById('rainbowSound').play();
-      } else {
-        document.getElementById('logoSound').play();
+        content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
+        overlay.appendChild(content);
+        document.body.appendChild(overlay);
       }
-    });
 
-    const fondoMusica = document.getElementById('fondoMusica');
-    const toggleMusica = document.getElementById('toggleMusica');
+      document.getElementById('addBtn').addEventListener('click', () => {
+        const pedidoDiv = document.createElement('div');
+        pedidoDiv.className = 'pedido';
 
-    toggleMusica.addEventListener('click', () => {
-      fondoMusica.muted = !fondoMusica.muted;
-      toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
-    });
+        const label = document.createElement('span');
+        label.textContent = `Pedido ${getNextPedidoNumber()}:`;
 
-    loadPedidos();
-  </script>
-</body>
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Descripción...';
+
+        const doneBtn = document.createElement('button');
+        doneBtn.textContent = '✔';
+        doneBtn.onclick = () => {
+          const desc = input.value.trim();
+          if (!desc) return;
+
+          pedidosData.push(desc);
+          savePedidos();
+          input.remove();
+          doneBtn.remove();
+          renderPedido(pedidosData.length, desc, pedidoDiv);
+        };
+
+        pedidoDiv.appendChild(label);
+        pedidoDiv.appendChild(input);
+        pedidoDiv.appendChild(doneBtn);
+        document.getElementById('pedidos').appendChild(pedidoDiv);
+      });
+
+      document.getElementById('logo').addEventListener('click', () => {
+        logoClicks++;
+        if (logoClicks >= 5 && !logoRainbow) {
+          document.getElementById('logo').classList.add('rainbow');
+          logoRainbow = true;
+          document.getElementById('rainbowSound').play();
+        } else {
+          document.getElementById('logoSound').play();
+        }
+      });
+
+      const fondoMusica = document.getElementById('fondoMusica');
+      const toggleMusica = document.getElementById('toggleMusica');
+
+      toggleMusica.addEventListener('click', () => {
+        fondoMusica.muted = !fondoMusica.muted;
+        toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
+      });
+
+      loadPedidos();
+    </script>
+  </body>
 </html>
