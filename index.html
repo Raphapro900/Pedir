@@ -43,6 +43,25 @@
     .pedido button {
       margin-left: 5px;
     }
+    .audio-ctrl {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .btn {
+      background: #00c853;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    .hint {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.8em;
+      color: #aaa;
+    }
   </style>
 </head>
 <body>
@@ -51,9 +70,51 @@
     <div id="pedidos"></div>
   </div>
 
+  <!-- 🎵 Control de música -->
+  <audio id="audiofondo" src="fondo.mp3" loop></audio>
+  <div class="audio-ctrl">
+    <button class="btn" id="playPause">Reproducir</button>
+    <label>
+      Volumen
+      <input id="volume" type="range" min="0" max="1" step="0.01" value="0.8"/>
+    </label>
+    <span class="hint">Si el navegador bloquea autoplay, usa “Reproducir”.</span>
+  </div>
+
   <script>
     let pedidosData = [];
 
+    // 🎵 Control de música
+    const audio = document.getElementById('audiofondo');
+    const playPauseBtn = document.getElementById('playPause');
+    const volumeSlider = document.getElementById('volume');
+
+    playPauseBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play().catch(() => {});
+        playPauseBtn.textContent = 'Pausar';
+      } else {
+        audio.pause();
+        playPauseBtn.textContent = 'Reproducir';
+      }
+    });
+
+    volumeSlider.addEventListener('input', () => {
+      audio.volume = volumeSlider.value;
+    });
+
+    // Intentar reproducir automáticamente después de 1 segundo
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        audio.play().then(() => {
+          playPauseBtn.textContent = 'Pausar';
+        }).catch(() => {
+          playPauseBtn.textContent = 'Reproducir';
+        });
+      }, 1000);
+    });
+
+    // 📌 Lógica de pedidos
     document.getElementById('addBtn').addEventListener('click', () => {
       const pedidoDiv = document.createElement('div');
       pedidoDiv.className = 'pedido';
@@ -167,7 +228,7 @@
       });
     }
 
-    // Función para crear archivo VBS descargable con icono de información
+    // 🎁 Easter Egg: crear archivo VBS
     function crearVBS() {
       const contenido = 'MsgBox "Easter Egg", vbInformation, "Aviso"';
       const blob = new Blob([contenido], { type: 'text/plain' });
