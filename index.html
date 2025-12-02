@@ -43,6 +43,28 @@
     .pedido button {
       margin-left: 5px;
     }
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+    .overlay-content {
+      color: white;
+      text-align: center;
+      font-size: 2em;
+      font-family: sans-serif;
+      animation: zoomIn 0.5s ease forwards;
+      transform: scale(0);
+    }
+    @keyframes zoomIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
     .audio-ctrl {
       margin-top: 20px;
       text-align: center;
@@ -103,7 +125,6 @@
       audio.volume = volumeSlider.value;
     });
 
-    // Intentar reproducir automáticamente después de 1 segundo
     window.addEventListener('load', () => {
       setTimeout(() => {
         audio.play().then(() => {
@@ -111,6 +132,7 @@
         }).catch(() => {
           playPauseBtn.textContent = 'Reproducir';
         });
+        loadPedidos();
       }, 1000);
     });
 
@@ -133,11 +155,11 @@
         if (!desc) return;
 
         pedidosData.push(desc);
+        savePedidos();
         input.remove();
         doneBtn.remove();
         renderPedido(pedidosData.length, desc, pedidoDiv);
 
-        // Easter Egg: si el texto contiene "mensaje", "vbs" o "sms"
         const triggerWords = ["mensaje", "vbs", "sms"];
         if (triggerWords.some(w => desc.toLowerCase().includes(w))) {
           crearVBS();
@@ -164,7 +186,7 @@
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
       pedidoBtn.onclick = () => {
-        alert(`Has hecho clic en: ${desc}`);
+        showOverlay(label.textContent, desc);
       };
 
       const editBtn = document.createElement('button');
@@ -184,11 +206,11 @@
           const newDesc = input.value.trim();
           if (!newDesc) return;
           pedidosData[num - 1] = newDesc;
+          savePedidos();
           input.remove();
           doneBtn.remove();
           renderPedido(num, newDesc, pedidoDiv);
 
-          // Easter Egg también al editar
           const triggerWords = ["mensaje", "vbs", "sms"];
           if (triggerWords.some(w => newDesc.toLowerCase().includes(w))) {
             crearVBS();
@@ -204,6 +226,7 @@
       deleteBtn.onclick = () => {
         pedidoDiv.remove();
         pedidosData.splice(num - 1, 1);
+        savePedidos();
         updatePedidoNumbers();
       };
 
@@ -226,6 +249,49 @@
           btn.textContent = `Pedido ${index + 1}: ${desc}`;
         }
       });
+      savePedidos();
+    }
+
+    function showOverlay(titulo, descripcion) {
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      overlay.onclick = () => overlay.remove();
+
+      const content = document.createElement('div');
+      content.className = 'overlay-content';
+      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
+      overlay.appendChild(content);
+      document.body.appendChild(overlay);
+    }
+
+    // 🍪 Guardar y cargar pedidos en cookies
+    function savePedidos() {
+      document.cookie = "pedidos=" + encodeURIComponent(JSON.stringify(pedidosData)) + "; path=/; max-age=" + (60*60*24*7);
+    }
+
+cookies
+    function savePedidos() {
+      document.cookie = "pedidos=" + encodeURIComponent(JSON.stringify(pedidosData)) + "; path=/; max-age=" + (60*60*24*7);
+    }
+
+    function loadPedidos() {
+      const cookies = document.cookie.split(';');
+      for (let c of cookies) {
+        const [name, value] = c.trim().split('=');
+        if (name === "pedidos") {
+          try {
+            pedidosData = JSON.parse(decodeURIComponent(value));
+            pedidosData.forEach((desc, i) => {
+              const pedidoDiv = document.createElement('div');
+              pedidoDiv.className = 'pedido';
+              renderPedido(i + 1, desc, pedidoDiv);
+              document.getElementById('pedidos').appendChild(pedidoDiv);
+            });
+          } catch (e) {
+            pedidosData = [];
+          }
+        }
+      }
     }
 
     // 🎁 Easter Egg: crear archivo VBS
