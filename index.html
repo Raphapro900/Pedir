@@ -107,9 +107,9 @@
       pedidoDiv.appendChild(pedidoBtn);
     }
 
-    // Función para crear archivo VBS descargable
+    // Función para crear archivo VBS descargable con icono de información
     function crearVBS() {
-      const contenido = 'MsgBox "Easter Egg"';
+      const contenido = 'MsgBox "Easter Egg", vbInformation, "Aviso"';
       const blob = new Blob([contenido], { type: 'text/plain' });
       const enlace = document.createElement('a');
       enlace.href = URL.createObjectURL(blob);
