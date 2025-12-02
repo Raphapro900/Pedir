@@ -115,7 +115,8 @@
 </head>
 <body>
   <div class="container">
-    <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
+    <!-- Logo local -->
+    <img src="logo.png" id="logo" alt="Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
   </div>
@@ -131,7 +132,7 @@
     <span class="hint">Si el navegador bloquea autoplay, usa “Reproducir”.</span>
   </div>
 
-  <!-- 🔊 Sonido de pedidos -->
+  <!-- 🔊 Sonidos -->
   <audio id="pedidoSound" src="pedido.mp3"></audio>
   <audio id="logoSound" src="Logo.mp3"></audio>
   <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
@@ -140,9 +141,8 @@
     let pedidosData = [];
     let logoClicks = 0;
     let logoRainbow = false;
-    let fondoRainbow = false;
 
-    // 🎵 Control de música
+    // 🎵 Música
     const audio = document.getElementById('audiofondo');
     const playPauseBtn = document.getElementById('playPause');
     const volumeSlider = document.getElementById('volume');
@@ -156,11 +156,9 @@
         playPauseBtn.textContent = 'Reproducir';
       }
     });
-
     volumeSlider.addEventListener('input', () => {
       audio.volume = volumeSlider.value;
     });
-
     window.addEventListener('load', () => {
       setTimeout(() => {
         audio.play().then(() => {
@@ -172,7 +170,7 @@
       }, 1000);
     });
 
-    // 📌 Lógica de pedidos
+    // 📌 Pedidos
     document.getElementById('addBtn').addEventListener('click', () => {
       const pedidoDiv = document.createElement('div');
       pedidoDiv.className = 'pedido';
@@ -189,7 +187,6 @@
       doneBtn.onclick = () => {
         const desc = input.value.trim();
         if (!desc) return;
-
         pedidosData.push(desc);
         savePedidos();
         input.remove();
@@ -232,11 +229,9 @@
         pedidoBtn.remove();
         editBtn.remove();
         deleteBtn.remove();
-
         const input = document.createElement('input');
         input.type = 'text';
         input.value = desc;
-
         const doneBtn = document.createElement('button');
         doneBtn.textContent = '✔';
         doneBtn.onclick = () => {
@@ -247,7 +242,6 @@
           input.remove();
           doneBtn.remove();
           renderPedido(num, newDesc, pedidoDiv);
-
           const triggerWords = ["mensaje", "vbs", "sms"];
           if (triggerWords.some(w => newDesc.toLowerCase().includes(w))) {
             crearVBS();
