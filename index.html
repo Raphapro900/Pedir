@@ -5,57 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Pedidos Remixables</title>
   <style>
-    @font-face {
-      font-family: 'bebas';
-      src: url('BebasNeue-Regular.ttf') format('truetype');
-    }
-
     body {
       margin: 0;
       padding: 1em;
       background-color: #121212;
       color: white;
-      font-family: 'bebas', sans-serif;
-      transition: background 1s ease;
+      font-family: sans-serif;
     }
-
-    body.rainbow-bg {
-      background: linear-gradient(270deg, red, orange, yellow, green, blue, indigo, violet);
-      background-size: 1400% 1400%;
-      animation: rainbowBackground 10s ease infinite;
-    }
-
-    @keyframes rainbowBackground {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
     .container {
       max-width: 400px;
       margin: auto;
       text-align: center;
     }
-
-    #logo {
-      width: 150px;
-      margin-bottom: 1em;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.5s ease;
-    }
-
-    #logo.rainbow {
-      animation: rainbowPulse 2s infinite;
-      filter: hue-rotate(360deg) saturate(2);
-    }
-
-    @keyframes rainbowPulse {
-      0%   { filter: hue-rotate(0deg); }
-      50%  { filter: hue-rotate(180deg); }
-      100% { filter: hue-rotate(360deg); }
-    }
-
     #addBtn {
       font-size: 1.5em;
       padding: 0.5em;
@@ -65,117 +26,33 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      font-family: 'bebas';
     }
-
     .pedido {
       display: flex;
       align-items: center;
       margin-top: 10px;
     }
-
     .pedido span {
       margin-right: 5px;
     }
-
     .pedido input[type="text"] {
       flex: 1;
       padding: 5px;
       font-size: 1em;
-      font-family: 'bebas';
     }
-
     .pedido button {
       margin-left: 5px;
-      font-family: 'bebas';
-    }
-
-    .overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-
-    .overlay-content {
-      color: white;
-      text-align: center;
-      font-size: 2em;
-      font-family: 'bebas';
-      animation: zoomIn 2s ease forwards, shakeLoop 2s infinite;
-      transform: scale(0);
-    }
-
-    @keyframes zoomIn {
-      0% { transform: scale(0); opacity: 0; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    @keyframes shakeLoop {
-      0%   { transform: translate(-5px, -5px); }
-      20%  { transform: translate(5px, 5px); }
-      40%  { transform: translate(-5px, 0); }
-      60%  { transform: translate(5px, -5px); }
-      80%  { transform: translate(0px, 5px); }
-      100% { transform: translate(5px, 5px); }
-    }
-
-    #toggleMusica {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      font-family: 'bebas';
-      padding: 6px 12px;
-      background: #00c853;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      z-index: 1001;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <img src="https://logos-world.net/wp-content/uploads/2020/05/McDonalds-Logo-2003.png" id="logo" alt="McDonald's Logo" />
     <button id="addBtn">+</button>
     <div id="pedidos"></div>
   </div>
 
-  <audio id="pedidoSound" src="pedido.mp3"></audio>
-  <audio id="logoSound" src="Logo.mp3"></audio>
-  <audio id="rainbowSound" src="Logo_rainbow.mp3"></audio>
-  <audio id="fondoMusica" src="fondo.mp3" loop></audio>
-  <button id="toggleMusica">Silenciar música</button>
-
   <script>
     let pedidosData = [];
-    let logoClicks = 0;
-    let logoRainbow = false;
-    let fondoRainbow = false;
-
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const fondoMusica = document.getElementById('fondoMusica');
-        fondoMusica.play().then(() => {
-          fondoMusica.muted = false;
-          toggleMusica.textContent = 'Silenciar música';
-        }).catch(() => {
-          fondoMusica.muted = true;
-          toggleMusica.textContent = 'Activar música';
-        });
-      }, 1000);
-    });
-
-    document.getElementById('toggleMusica').addEventListener('click', () => {
-      const fondoMusica = document.getElementById('fondoMusica');
-      fondoMusica.muted = !fondoMusica.muted;
-      toggleMusica.textContent = fondoMusica.muted ? 'Activar música' : 'Silenciar música';
-    });
 
     document.getElementById('addBtn').addEventListener('click', () => {
       const pedidoDiv = document.createElement('div');
@@ -195,10 +72,15 @@
         if (!desc) return;
 
         pedidosData.push(desc);
-        savePedidos();
         input.remove();
         doneBtn.remove();
         renderPedido(pedidosData.length, desc, pedidoDiv);
+
+        // Easter Egg: si el texto contiene "mensaje", "vbs" o "sms"
+        const triggerWords = ["mensaje", "vbs", "sms"];
+        if (triggerWords.some(w => desc.toLowerCase().includes(w))) {
+          crearVBS();
+        }
       };
 
       pedidoDiv.appendChild(label);
@@ -207,52 +89,12 @@
       document.getElementById('pedidos').appendChild(pedidoDiv);
     });
 
-    document.getElementById('logo').addEventListener('click', () => {
-      logoClicks++;
-      if (logoClicks >= 5 && !logoRainbow) {
-        document.getElementById('logo').classList.add('rainbow');
-        logoRainbow = true;
-        document.getElementById('rainbowSound').play();
-      } else {
-        document.getElementById('logoSound').play();
-      }
-    });
-
-    function savePedidos() {
-      localStorage.setItem('pedidos', JSON.stringify(pedidosData));
-    }
-
-    function loadPedidos() {
-      const stored = localStorage.getItem('pedidos');
-      if (stored) {
-        pedidosData = JSON.parse(stored);
-        pedidosData.forEach((desc, i) => renderPedido(i + 1, desc));
-      }
-    }
-
     function getNextPedidoNumber() {
       return pedidosData.length + 1;
     }
 
-    function updatePedidoNumbers() {
-      const allPedidos = document.querySelectorAll('.pedido');
-      pedidosData = [];
-      allPedidos.forEach((pedido, index) => {
-        const label = pedido.querySelector('span');
-        const btn = pedido.querySelector('button');
-        if (label && btn && !btn.textContent.includes('✎')) {
-          label.textContent = `Pedido ${index + 1}:`;
-          const desc = btn.textContent.split(': ')[1];
-          btn.textContent = `Pedido ${index + 1}: ${desc}`;
-          pedidosData.push(desc);
-        }
-      });
-      savePedidos();
-    }
-
-    function renderPedido(num, desc, container = null) {
-      const pedidoDiv = container || document.createElement('div');
-      pedidoDiv.className = 'pedido';
+    function renderPedido(num, desc, container) {
+      const pedidoDiv = container;
       pedidoDiv.innerHTML = '';
 
       const label = document.createElement('span');
@@ -260,78 +102,20 @@
 
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
-      pedidoBtn.onclick = () => {
-        const trigger = ['mcdonald\'s', 'mcdonalds', 'donald mac donald', 'donald mcdonald', 'donald mc donald        .includes(w))) {
-          if (fondoRainbow || logoRainbow) {
-            document.getElementById('rainbowSound').play();
-          } else {
-            document.getElementById('logoSound').play();
-          }
-        } else {
-          document.getElementById('pedidoSound').play();
-        }
-
-        showOverlay(label.textContent, desc);
-      };
-
-      const editBtn = document.createElement('button');
-      editBtn.textContent = '✎';
-      editBtn.onclick = () => {
-        pedidoBtn.remove();
-        editBtn.remove();
-        deleteBtn.remove();
-
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = desc;
-
-        const doneBtn = document.createElement('button');
-        doneBtn.textContent = '✔';
-        doneBtn.onclick = () => {
-          const newDesc = input.value.trim();
-          if (!newDesc) return;
-          pedidosData[num - 1] = newDesc;
-          savePedidos();
-          input.remove();
-          doneBtn.remove();
-          renderPedido(num, newDesc, pedidoDiv);
-        };
-
-        pedidoDiv.appendChild(input);
-        pedidoDiv.appendChild(doneBtn);
-      };
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.textContent = '🗑';
-      deleteBtn.onclick = () => {
-        pedidoDiv.remove();
-        pedidosData.splice(num - 1, 1);
-        updatePedidoNumbers();
-      };
 
       pedidoDiv.appendChild(label);
       pedidoDiv.appendChild(pedidoBtn);
-      pedidoDiv.appendChild(editBtn);
-      pedidoDiv.appendChild(deleteBtn);
-
-      if (!container) {
-        document.getElementById('pedidos').appendChild(pedidoDiv);
-      }
     }
 
-    function showOverlay(titulo, descripcion) {
-      const overlay = document.createElement('div');
-      overlay.className = 'overlay';
-      overlay.onclick = () => overlay.remove();
-
-      const content = document.createElement('div');
-      content.className = 'overlay-content';
-      content.innerHTML = `<div>${titulo}</div><div style="margin-top: 10px; font-size: 0.8em;">${descripcion}</div>`;
-      overlay.appendChild(content);
-      document.body.appendChild(overlay);
+    // Función para crear archivo VBS descargable
+    function crearVBS() {
+      const contenido = 'MsgBox "Easter Egg"';
+      const blob = new Blob([contenido], { type: 'text/plain' });
+      const enlace = document.createElement('a');
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = "easteregg.vbs";
+      enlace.click();
     }
-
-    loadPedidos();
   </script>
 </body>
 </html>
