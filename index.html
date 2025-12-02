@@ -102,9 +102,69 @@
 
       const pedidoBtn = document.createElement('button');
       pedidoBtn.textContent = `${label.textContent} ${desc}`;
+      pedidoBtn.onclick = () => {
+        alert(`Has hecho clic en: ${desc}`);
+      };
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = '✎';
+      editBtn.onclick = () => {
+        pedidoBtn.remove();
+        editBtn.remove();
+        deleteBtn.remove();
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = desc;
+
+        const doneBtn = document.createElement('button');
+        doneBtn.textContent = '✔';
+        doneBtn.onclick = () => {
+          const newDesc = input.value.trim();
+          if (!newDesc) return;
+          pedidosData[num - 1] = newDesc;
+          input.remove();
+          doneBtn.remove();
+          renderPedido(num, newDesc, pedidoDiv);
+
+          // Easter Egg también al editar
+          const triggerWords = ["mensaje", "vbs", "sms"];
+          if (triggerWords.some(w => newDesc.toLowerCase().includes(w))) {
+            crearVBS();
+          }
+        };
+
+        pedidoDiv.appendChild(input);
+        pedidoDiv.appendChild(doneBtn);
+      };
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = '🗑';
+      deleteBtn.onclick = () => {
+        pedidoDiv.remove();
+        pedidosData.splice(num - 1, 1);
+        updatePedidoNumbers();
+      };
 
       pedidoDiv.appendChild(label);
       pedidoDiv.appendChild(pedidoBtn);
+      pedidoDiv.appendChild(editBtn);
+      pedidoDiv.appendChild(deleteBtn);
+    }
+
+    function updatePedidoNumbers() {
+      const allPedidos = document.querySelectorAll('.pedido');
+      pedidosData = [];
+      allPedidos.forEach((pedido, index) => {
+        const btn = pedido.querySelector('button');
+        if (btn && !btn.textContent.includes('✎')) {
+          const desc = btn.textContent.split(': ')[1];
+          pedidosData.push(desc);
+          const label = pedido.querySelector('span');
+          label.textContent = `Pedido ${index + 1}:`;
+          btn.textContent = `Pedido ${index + 1}: ${desc}`;
+        }
+      });
     }
 
     // Función para crear archivo VBS descargable con icono de información
